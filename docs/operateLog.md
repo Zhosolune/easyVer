@@ -23,3 +23,4 @@
 | 2026-03-21 21:30 | 修改 | ui/widgets/tag_badge.py | 优化 TagBadge 删除交互 | 移除侧滑遮罩动画，改为 Hover 时将图标原地替换为带圆形背景的删除图标，点击左侧图标区域触发删除 | 待测试 |
 | 2026-03-21 21:35 | 修改 | ui/widgets/tag_badge.py | 修正 ToolTip 触发范围 | 将删除提示的 ToolTipFilter 绑定从整个标签缩小至仅图标 `_icon_label` 区域，避免鼠标在文字上时产生误导 | 待测试 |
 | 2026-03-21 21:45 | 优化 | ui/widgets/tag_badge.py, ui/widgets/milestone_card.py | 卡片高度对齐 | 1. 修正 MilestoneCard 各行的高度，保证无标签卡片与有标签卡片视觉一致 | 待测试 |
+| 2026-03-21 22:00 | 优化 | ui/pages/settings_page.py | 增加缩放设置提示 | 调整界面缩放比例后弹出 InfoBar，提示用户重启软件后生效 | 待测试 |

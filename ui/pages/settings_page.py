@@ -162,7 +162,13 @@ class SettingPage(ScrollArea):
 
         cfg.themeChanged.connect(setTheme)
         self._themeColorCard.colorChanged.connect(lambda c: setThemeColor(c))
+        
+        # 缩放比例改变提示
+        cfg.dpiScale.valueChanged.connect(self._on_dpi_scale_changed)
         # self.micaCard.checkedChanged.connect(signalBus.micaEnableChanged)        
+
+    def _on_dpi_scale_changed(self, scale) -> None:
+        InfoBar.success("设置成功", "界面缩放比例已修改，将在重启软件后生效。", parent=self.window())
 
     def _on_change_log_path(self) -> None:
         path = QFileDialog.getExistingDirectory(self, "选择日志保存目录", cfg.logDir.value)
