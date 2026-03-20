@@ -19,3 +19,7 @@
 | 2026-03-20 10:55 | 重构 | ui/dialogs/create_milestone_dialog.py | 彻底根绝目录操作及暂存单文件时的闪退卡死问题 | 废弃物理修改 UI 节点（`takeChild`, `clear` 等），引入极简 O(N) `setHidden` 属性可见性切换算法，实现 0 时延、不操作对象内存的绝对安全变更 | 待测试 |
 | 2026-03-20 15:55 | 新增 | .gitignore | 添加 Git 忽略配置 | 忽略 Python 缓存文件及常用忽略项，保持仓库整洁 | 无需测试 |
 | 2026-03-20 16:00 | 新增 | README.md | 编写项目说明文档 | 总结项目特性、技术栈、使用方法和目录结构，便于了解项目概况 | 无需测试 |
+| 2026-03-20 16:15 | 修改 | ui/widgets/tag_badge.py | 优化 TagBadge 交互体验 | 1. 删除遮罩动画改为从左向右滑入；2. 增加基于 Fluent ToolTipFilter 的悬浮提示 | 待测试 |
+| 2026-03-21 21:30 | 修改 | ui/widgets/tag_badge.py | 优化 TagBadge 删除交互 | 移除侧滑遮罩动画，改为 Hover 时将图标原地替换为带圆形背景的删除图标，点击左侧图标区域触发删除 | 待测试 |
+| 2026-03-21 21:35 | 修改 | ui/widgets/tag_badge.py | 修正 ToolTip 触发范围 | 将删除提示的 ToolTipFilter 绑定从整个标签缩小至仅图标 `_icon_label` 区域，避免鼠标在文字上时产生误导 | 待测试 |
+| 2026-03-21 21:45 | 优化 | ui/widgets/tag_badge.py, ui/widgets/milestone_card.py | 卡片高度对齐 | 1. 修正 MilestoneCard 各行的高度，保证无标签卡片与有标签卡片视觉一致 | 待测试 |

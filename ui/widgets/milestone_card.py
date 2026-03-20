@@ -39,6 +39,7 @@ class MilestoneCard(CardWidget):
         top = QHBoxLayout()
         title_text = name if name else f"v{version}"
         version_label = StrongBodyLabel(title_text, self)
+        version_label.setFixedHeight(20) # 固定名称行高度
         top.addWidget(version_label)
             
         time_label = CaptionLabel(ts_to_str(created_at), self)
@@ -56,12 +57,14 @@ class MilestoneCard(CardWidget):
         # 第三行：哈希 + 文件数
         count_label = CaptionLabel(f"#{hash_id}   ·   包含 {file_count} 个文件", self)
         count_label.setObjectName("milestoneCountLabel")
+        count_label.setFixedHeight(16) # 固定哈希行高度
         layout.addWidget(count_label)
         
         # 第四行：标签
         if not tags:
             empty_tag = CaptionLabel("标签：无", self)
             empty_tag.setObjectName("milestoneEmptyTagLabel")
+            empty_tag.setFixedHeight(20) # 保持与有标签时 TagBadge 等高
             layout.addWidget(empty_tag)
         else:
             tag_flow_widget = QWidget(self)

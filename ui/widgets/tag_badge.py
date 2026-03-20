@@ -2,7 +2,7 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QRect, QEasingCurve, QSize
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel
-from qfluentwidgets import FluentIcon, TransparentToolButton, isDarkTheme
+from qfluentwidgets import FluentIcon, TransparentToolButton, isDarkTheme, ToolTipFilter, ToolTipPosition
 
 class TagBadge(QFrame):
     """
@@ -64,13 +64,19 @@ class TagBadge(QFrame):
     def _build_ui(self, text: str) -> None:
         """构建内部布局：图标 + 文字（+ 可选的内联 × 按鈕 / 遮罩层）。"""
         h = QHBoxLayout(self)
-        h.setContentsMargins(8, 2, 8, 2)   # 对称内边距，减小上下留白降低高度
+        h.setContentsMargins(6, 2, 6, 2)   # 对称内边距，减小上下留白降低高度
         h.setSpacing(4)
 
         # ── 图标 ──
         self._icon_label = QLabel(self)
         self._icon_label.setFixedSize(12, 12)
         self._icon_label.setObjectName("tagBadgeIcon")
+        
+        # 只在非筛选且非选中模式下，给图标添加删除提示
+        if not self.is_filter_mode and not self.is_selectable:
+            self._icon_label.setToolTip("删除标签")
+            self._icon_label.installEventFilter(ToolTipFilter(self._icon_label, showDelay=500, position=ToolTipPosition.TOP))
+            
         self._refresh_icon()
         h.addWidget(self._icon_label, 0, Qt.AlignmentFlag.AlignVCenter)
 
@@ -90,33 +96,14 @@ class TagBadge(QFrame):
             self._close_btn.setFixedSize(10, 10)
             self._close_btn.setIconSize(QSize(8, 8))
             self._close_btn.clicked.connect(self._on_close_clicked)
-            h.setContentsMargins(8, 2, 6, 2)   # 右边距缩小
+            h.setContentsMargins(6, 2, 6, 2)   # 右边距缩小
             h.addWidget(self._close_btn, 0, Qt.AlignmentFlag.AlignVCenter)
-
-        elif self.is_deletable:
-            # ── 构建遮罩层（hover 时从右向左滑入）──
-            self._overlay = QFrame(self)
-            self._overlay.setObjectName("tagBadgeOverlay")
-            ov = QHBoxLayout(self._overlay)
-            ov.setContentsMargins(0, 0, 0, 0)
-            # 遮罩中央的 × 图标（白色）
-            self._close_icon = QLabel(self._overlay)
-            self._close_icon.setObjectName("tagBadgeCloseIcon")
-            self._close_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            ov.addWidget(self._close_icon, 0, Qt.AlignmentFlag.AlignCenter)
-            self._overlay.hide()
-            self._overlay.raise_()  # 最顶层
-            self._refresh_close_icon()
-            # 滑入动画
-            self._anim = QPropertyAnimation(self._overlay, b"geometry")
-            self._anim.setDuration(150)
-            self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
 
     # ------------------------------------------------------------------ #
     # 样式计算
     # ------------------------------------------------------------------ #
     def _apply_color(self) -> None:
-        """根据当前状态设置背景、边框、文字颜色和遮罩颜色。"""
+        """根据当前状态设置背景、边框、文字颜色。"""
         c = self.color
         # 常态下无背景色，选中时填充色彩
         bg_alpha   = 120 if (self.is_selectable and self._is_selected) else 0
@@ -125,9 +112,6 @@ class TagBadge(QFrame):
         border     = f"rgba({c.red()},{c.green()},{c.blue()},180)"
         tc         = f"rgb({c.red()},{c.green()},{c.blue()})"
 
-        # 遮罩颜色：比原标签深一些的圆形背景（半透明）
-        ov_color   = f"rgba({c.red()},{c.green()},{c.blue()},180)"
-
         self.setStyleSheet(
             f"QFrame#tagBadge {{"
             f"  background-color:{bg};"
@@ -135,12 +119,6 @@ class TagBadge(QFrame):
             f"  border-radius:10px;"
             f"}}"
             f"QLabel#tagBadgeText{{color:{tc};background:transparent;border:none;}}"
-            f"QFrame#tagBadgeOverlay {{"
-            f"  background-color:{ov_color};"
-            f"  border-radius:10px;"   # 20px / 2 = 10px
-            f"  border:none;"
-            f"}}"
-            f"QLabel#tagBadgeCloseIcon{{background:transparent;border:none;}}"
         )
         self._refresh_icon()
 
@@ -149,14 +127,19 @@ class TagBadge(QFrame):
         try:
             pix = FluentIcon.TAG.icon(color=self.color).pixmap(12, 12)
             self._icon_label.setPixmap(pix)
+            self._icon_label.setStyleSheet("background: transparent; border-radius: 6px;")
         except Exception:
             pass
 
     def _refresh_close_icon(self) -> None:
-        """刷新遮罩上的白色 × 图标（仅默认模式）。"""
+        """刷新为删除图标（带圆形背景）。"""
         try:
-            pix = FluentIcon.CLOSE.icon(color=QColor("white")).pixmap(12, 12)
-            self._close_icon.setPixmap(pix)
+            pix = FluentIcon.CLOSE.icon(color=QColor("white")).pixmap(8, 8)
+            self._icon_label.setPixmap(pix)
+            # 背景色比原标签深一些的圆形背景
+            c = self.color
+            bg_color = f"rgba({c.red()},{c.green()},{c.blue()},180)"
+            self._icon_label.setStyleSheet(f"background-color: {bg_color}; border-radius: 6px; padding: 2px;")
         except Exception:
             pass
 
@@ -165,36 +148,23 @@ class TagBadge(QFrame):
     # ------------------------------------------------------------------ #
     def enterEvent(self, e):
         super().enterEvent(e)
-        if hasattr(self, '_anim') and self.is_deletable:
-            w, ht = self.width(), self.height()
-            # 遮罩宽=ht，高=ht（圆形）
-            ov_w = ht
-            
-            self._anim.stop()
-            # 初始位置：从标签最右侧的外边缘开始
-            self._anim.setStartValue(QRect(w, 0, ov_w, ht))
-            # 结束位置：刚好靠在最右面，即覆盖最右的 ht 宽度区域
-            self._anim.setEndValue(QRect(w - ov_w, 0, ov_w, ht))
-            
-            self._overlay.show()
-            self._anim.start()
+        if self.is_deletable and not self.is_filter_mode:
+            self._refresh_close_icon()
 
     def leaveEvent(self, e):
         super().leaveEvent(e)
-        if hasattr(self, '_anim') and self.is_deletable:
-            self._anim.stop()
-            self._overlay.hide()
+        if self.is_deletable and not self.is_filter_mode:
+            self._refresh_icon()
 
     def mousePressEvent(self, e):
         if e.button() != Qt.MouseButton.LeftButton:
             super().mousePressEvent(e)
             return
 
-        from PyQt6.QtCore import QPoint
-        # 优先判断是否点击了遮罩层的删除区
-        if not self.is_filter_mode and self.is_deletable and hasattr(self, '_overlay') and self._overlay.isVisible():
-            pos_x = e.pos().x()
-            if pos_x >= self.width() - self.height():
+        # 优先判断是否点击了图标的删除区
+        if not self.is_filter_mode and self.is_deletable:
+            # 图标的固定大小是12x12，加上外边距大概是20的宽度
+            if e.pos().x() <= 20:
                 self._on_close_clicked()
                 e.accept()
                 return
