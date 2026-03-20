@@ -1,0 +1,9 @@
+/* style/welcome_page.qss */
+QScrollArea, QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+    border: none;
+}
+
+QWidget#welcomeCard {
+    background-color: transparent;
+}

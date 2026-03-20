@@ -1,0 +1,92 @@
+/* resources/qss/light/repo_page.qss
+   包含 RepoPage 本身及其所有关联对话框（TagDialog / CreateMilestoneDialog）的样式，
+   对话框通过 addStyleSheet(self, StyleSheet.REPO_PAGE) 以追加方式引用此文件。  */
+
+/* ════════════════════════════════════════════════════════════
+   RepoPage —— 页面本身
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── 分割线 ──────────────────────────────────────────────── */
+QFrame#repoSeparator {
+    background-color: rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+/* ─── Splitter 手柄 ───────────────────────────────────────── */
+QSplitter#repoSplitter::handle,
+QSplitter#repoContentSplitter::handle {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ─── 标题 ────────────────────────────────────────────────── */
+SubtitleLabel#repoTitleLabel {
+    font-weight: normal;
+}
+
+/* ─── 里程碑卡片容器 ─────────────────────────────────────── */
+QFrame#milestoneCard {
+    background-color: transparent;
+    border: none;
+}
+
+/* ─── ScrollArea 透明化 ───────────────────────────────────── */
+QScrollArea,
+QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+    border: none;
+}
+
+QScrollArea#milestoneListScroll {
+    background-color: transparent;
+    border: none;
+}
+
+/* ─── 次要文字颜色 ────────────────────────────────────────── */
+CaptionLabel#milestoneTimeLabel,
+CaptionLabel#milestoneEmptyTagLabel {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+CaptionLabel#milestoneCountLabel {
+    color: rgba(0, 0, 0, 0.5);
+    font-family: Consolas, monospace;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TagDialog / CreateMilestoneDialog —— 关联对话框
+   通过 addStyleSheet(self, StyleSheet.REPO_PAGE) 追加到对话框
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── 错误提示标签 ─────────────────────────────────────────
+   errType 属性替代 CSS 保留字 class                          */
+CaptionLabel[errType="error"] {
+    color: #cf222e;
+}
+
+/* ─── TagDialog：颜色选择器内部控件 ──────────────────────── */
+TagColorPicker QWidget#colorPickerLine {
+    background-color: rgba(0, 0, 0, 0.1);
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+TagColorPicker QWidget#colorPickerBlock {
+    border: 1px solid rgba(0, 0, 0, 30);
+    border-radius: 2px;
+}
+
+/* ─── 日期范围分隔符 ────────────────────────────────────────── */
+QLabel#dateRangeSep {
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+    padding: 0 2px;
+}
+
+/* ─── TagBadge × 清除按鈕 ──────────────────────────────────── */
+TransparentToolButton#tagBadgeCloseBtn {
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 7px;
+}
+TransparentToolButton#tagBadgeCloseBtn:hover {
+    background-color: rgba(0, 0, 0, 0.22);
+}

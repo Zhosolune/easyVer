@@ -1,0 +1,9 @@
+SettingPage, #settingScrollWidget {
+    background-color: transparent;
+}
+
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+

@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/easyVer">
+        <file>images/logo.png</file>
+
+        <file>qss/dark/repo_page.qss</file>
+        <file>qss/dark/welcome_page.qss</file>
+        <file>qss/dark/setting_page.qss</file>
+
+        <file>qss/light/repo_page.qss</file>
+        <file>qss/light/welcome_page.qss</file>
+        <file>qss/light/setting_page.qss</file>
+
+    </qresource>
+</RCC>
