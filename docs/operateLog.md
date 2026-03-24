@@ -24,3 +24,12 @@
 | 2026-03-21 21:35 | 修改 | ui/widgets/tag_badge.py | 修正 ToolTip 触发范围 | 将删除提示的 ToolTipFilter 绑定从整个标签缩小至仅图标 `_icon_label` 区域，避免鼠标在文字上时产生误导 | 待测试 |
 | 2026-03-21 21:45 | 优化 | ui/widgets/tag_badge.py, ui/widgets/milestone_card.py | 卡片高度对齐 | 1. 修正 MilestoneCard 各行的高度，保证无标签卡片与有标签卡片视觉一致 | 待测试 |
 | 2026-03-21 22:00 | 优化 | ui/pages/settings_page.py | 增加缩放设置提示 | 调整界面缩放比例后弹出 InfoBar，提示用户重启软件后生效 | 待测试 |
+| 2026-03-21 22:30 | 重构 | ui/widgets/milestone_detail_panel.py, ui/widgets/marquee_label.py | 优化里程碑详情界面的布局与文件视图 | 1. 重构详情顶部信息（名称、哈希、父版本等）的顺序与样式；2. 增加列表/树状两种文件变更视图，支持状态高亮（绿、黄、红+删除线）及文件夹状态推导；3. 添加右上角变更类型统计数字；4. 禁用横向滚动条并新增 MarqueeLabel 实现超长文件名悬浮滚动显示 | 待测试 |
+| 2026-03-22 00:05 | 修复 | ui/widgets/milestone_detail_panel.py | 修复详情页重复加载卡顿问题 | 增加防抖机制，检测到 `snap_id` 未变化时直接 return 避免无意义的树状图重复渲染 | 待测试 |
+| 2026-03-22 00:15 | 优化 | ui/widgets/milestone_detail_panel.py | 优化卡片点击响应速度 | 1. 使用 `QTimer.singleShot` 将耗时的树状图与列表 UI 构建逻辑推迟到事件循环空闲时执行；2. 在渲染前禁用组件重绘 (`setUpdatesEnabled(False)`) 减少布局抖动开销 | 待测试 |
+| 2026-03-22 00:30 | 深度优化 | ui/widgets/milestone_detail_panel.py | 解决切换卡片时UI卡死与列表空白问题 | 引入 `QThread` (FileLoadWorker)，将耗时的数据库查询、变更过滤及树状图节点推导计算全部移至后台独立线程执行，计算完成后再通过信号机制将数据传回主线程渲染 UI，彻底消除主线程阻塞，保证界面秒响应 | 待测试 |
+| 2026-03-22 00:40 | 重构 | core/workers/file_load_worker.py, ui/widgets/milestone_detail_panel.py | 遵守单一职责分离后台线程 | 将 `FileLoadWorker` 及其相关数据模型 `TreeNode` 从 UI 组件中抽离到专门的 `core/workers` 目录中，保持代码职责单一和模块化 | 无需测试 |
+| 2026-03-24 10:00 | 重构 | core/workers/commit_worker.py, ui/dialogs/create_milestone_dialog.py, core/workers/scan_worker.py, ui/widgets/working_tree_panel.py | 全面清理UI文件中的后台线程 | 严格遵守单一职责原则，将 `_CommitWorker` 和 `_ScanWorker` 从UI组件文件中抽离到 `core/workers` 目录下，彻底避免职责杂糅 | 无需测试 |
+| 2026-03-24 15:30 | 修复 | core/workers/file_load_worker.py | 修复获取详情失败报错 | 修复子线程访问数据库时因硬编码错误的数据库名称 `repo.db` 导致表不存在报错的问题，更正为 `easyver.db` | 已测试 |
+| 2026-03-24 15:40 | 优化 | ui/widgets/milestone_detail_panel.py, ui/widgets/marquee_label.py | 彻底解决点击详情时列表加载慢和卡死的问题 | 1. 废弃并删除低效的自定义组件 `MarqueeLabel`，改用 Qt 原生 Item 属性 (`setForeground`, `setFont`, `setToolTip`) 实现状态展示和悬浮提示；2. 启用 `setUniformItemSizes` 避免逐行重绘，将渲染时间从 O(N) 降至 O(1)，实现百万级文件毫秒级响应。 | 已测试 |
+| 2026-03-24 15:45 | 优化 | ui/widgets/milestone_detail_panel.py | 统一 UI 风格 | 1. 引入 `PyQt-Fluent-Widgets` 的 `ToolTipFilter` 替换 Qt 原生 Tooltip，保证悬浮提示的气泡样式与项目整体现代风格一致；2. 将文件视图切换控件从 `SegmentedWidget` 替换为水平布局的两个 `TransparentToolButton`（使用列表和文件夹图标），使界面更加轻量、清爽。 | 已测试 |

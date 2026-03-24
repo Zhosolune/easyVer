@@ -26,23 +26,24 @@ import logging
 def exception_hook(exctype, value, tb):
     """
     Global exception hook to catch unhandled exceptions.
-    Logs the full traceback and shows a critical error message box.
+    Logs the full traceback and shows a critical error message box if on the main thread.
     """
     error_msg = "".join(traceback.format_exception(exctype, value, tb))
     logging.critical("Uncaught exception:\n%s", error_msg)
 
-    # Show error message to user (optional, but good for GUI apps)
-    # Note: This might block if the main loop is frozen, but usually works for crashes.
-    try:
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Icon.Critical)
-        msg_box.setWindowTitle("Application Error")
-        msg_box.setText("An unhandled exception occurred.")
-        msg_box.setInformativeText(str(value))
-        msg_box.setDetailedText(error_msg)
-        msg_box.exec()
-    except:
-        pass  # If GUI fails, we at least have the log
+    # Show error message to user only if we are in the main thread
+    from PyQt6.QtCore import QThread
+    if QThread.currentThread() is QApplication.instance().thread():
+        try:
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Icon.Critical)
+            msg_box.setWindowTitle("Application Error")
+            msg_box.setText("An unhandled exception occurred.")
+            msg_box.setInformativeText(str(value))
+            msg_box.setDetailedText(error_msg)
+            msg_box.exec()
+        except:
+            pass  # If GUI fails, we at least have the log
 
     sys.__excepthook__(exctype, value, tb)
 

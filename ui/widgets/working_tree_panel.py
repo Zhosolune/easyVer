@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTreeWidgetItem
 from qfluentwidgets import TreeWidget, BreadcrumbBar, setFont, qconfig, Theme
 
 from core.working_tree import WorkingTreeScanner, FileStatus
+from core.workers.scan_worker import ScanWorker
 from utils.icon_provider import get_file_icon, get_folder_icon
 
 if TYPE_CHECKING:
@@ -28,18 +29,6 @@ _COLOR_ADDED    = QColor("#1a7f37")
 _COLOR_MODIFIED = QColor("#e36209")
 _ROOT_KEY = "__root__"
 
-
-class _ScanWorker(QThread):
-    done = pyqtSignal(list)
-
-    def __init__(self, scanner: WorkingTreeScanner) -> None:
-        super().__init__()
-        self._scanner = scanner
-
-    def run(self) -> None:
-        self.done.emit(self._scanner.scan())
-
-
 class WorkingTreePanel(QWidget):
     """文件树 + 面包屑导航表头。"""
 
@@ -48,7 +37,7 @@ class WorkingTreePanel(QWidget):
         self._app = app
         self._root_path = root_path
         self._root_name = Path(root_path).resolve().name
-        self._worker: Optional[_ScanWorker] = None
+        self._worker: Optional[ScanWorker] = None
         self._files_cache: list[FileStatus] = []
 
         self._setup_ui()
@@ -119,7 +108,7 @@ class WorkingTreePanel(QWidget):
         if self._worker and self._worker.isRunning():
             return
         scanner = WorkingTreeScanner(self._root_path, conn)
-        self._worker = _ScanWorker(scanner)
+        self._worker = ScanWorker(scanner)
         self._worker.done.connect(self._populate)
         self._worker.start()
 

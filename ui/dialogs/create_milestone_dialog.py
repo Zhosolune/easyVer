@@ -31,6 +31,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from core.working_tree import WorkingTreeScanner, FileStatus
+from core.workers.commit_worker import CommitWorker
 from utils.icon_provider import get_file_icon, get_folder_icon
 from app.style_sheet import StyleSheet
 from qfluentwidgets.common.style_sheet import addStyleSheet
@@ -103,48 +104,6 @@ class TreeActionDelegate(QStyledItemDelegate):
             painter.restore()
 
         icon.icon().paint(painter, cx - icon_size//2, cy - icon_size//2, icon_size, icon_size)
-
-
-class _CommitWorker(QThread):
-    """后台线程执行选择性提交。"""
-    progress = pyqtSignal(int, int)
-    finished = pyqtSignal(int)
-    error = pyqtSignal(str)
-
-    def __init__(self, root_path: str, db_path: str, staged: list[str],
-                 name: str, summary: str, detail: str, author: str) -> None:
-        super().__init__()
-        self._root_path = root_path
-        self._db_path = db_path
-        self._staged = staged
-        self._name = name
-        self._summary = summary
-        self._detail = detail
-        self._author = author
-
-    def run(self) -> None:
-        logger.info("Starting background commit: name='%s'", self._name)
-        try:
-            from db.connection import DatabaseConnection
-            from core.snapshot import SnapshotService
-            conn = DatabaseConnection(self._db_path)
-            svc = SnapshotService(self._root_path, 1, conn)
-            # 使用选择性提交：staged 列表
-            res = svc.commit(
-                name=self._name,
-                summary=self._summary,
-                detail=self._detail,
-                author=self._author,
-                selected_paths=self._staged,
-                progress_cb=lambda c, t: self.progress.emit(c, t),
-            )
-            conn.commit()
-            conn.close()
-            logger.info("Background commit finished successfully.")
-            self.finished.emit(res.snapshot_id)
-        except Exception:
-            logger.exception("Background commit failed.")
-            self.error.emit(traceback.format_exc())
 
 
 class CreateMilestoneDialog(FluentWidget):
@@ -774,7 +733,7 @@ class CreateMilestoneDialog(FluentWidget):
         from core.repository import RepositoryService
         db_path = str(RepositoryService.get_db_path(self._root_path))
 
-        self._worker = _CommitWorker(self._root_path, db_path, staged_list, milestone_name, summary, detail, author)
+        self._worker = CommitWorker(self._root_path, db_path, staged_list, milestone_name, summary, detail, author)
         self._worker.progress.connect(lambda c, t: self._progress.setValue(int(100 * c / max(t, 1))))
         self._worker.finished.connect(self._on_commit_finished)
         self._worker.error.connect(self._on_error)
