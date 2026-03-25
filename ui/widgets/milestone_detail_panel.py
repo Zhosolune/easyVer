@@ -82,10 +82,23 @@ class MilestoneDetailPanel(ScrollArea):
         dl.addWidget(self.commandBar)
 
         # 2. 里程碑基本信息
-        self._info_panel = QWidget(self._detail_widget)
+        self._info_container = QWidget(self._detail_widget)
+        info_container_layout = QHBoxLayout(self._info_container)
+        info_container_layout.setContentsMargins(10, 0, 10, 0)
+        info_container_layout.setSpacing(12)
+        
+        # 左侧竖线（引用效果）
+        self._quote_line = QWidget(self._info_container)
+        self._quote_line.setFixedWidth(4)
+        # 初始颜色将通过 themeChanged 信号统一设置
+        
+        self._info_panel = QWidget(self._info_container)
         info_layout = QVBoxLayout(self._info_panel)
-        info_layout.setContentsMargins(10, 0, 10, 0)
+        info_layout.setContentsMargins(0, 0, 0, 0)
         info_layout.setSpacing(8)
+        
+        info_container_layout.addWidget(self._quote_line)
+        info_container_layout.addWidget(self._info_panel, stretch=1)
 
         self._title = StrongBodyLabel("", self._info_panel)
         font = self._title.font()
@@ -97,9 +110,9 @@ class MilestoneDetailPanel(ScrollArea):
         self._author_label = CaptionLabel("", self._info_panel)
         self._time_label = CaptionLabel("", self._info_panel)
         
-        self._summary_label = BodyLabel("", self._info_panel)
+        self._summary_label = CaptionLabel("", self._info_panel)
         self._summary_label.setWordWrap(True)
-        self._detail_label = BodyLabel("", self._info_panel)
+        self._detail_label = CaptionLabel("", self._info_panel)
         self._detail_label.setWordWrap(True)
 
         info_layout.addWidget(self._title)
@@ -186,7 +199,8 @@ class MilestoneDetailPanel(ScrollArea):
 
         file_layout.addWidget(self._file_stack)
 
-        dl.addWidget(self._info_panel)
+        dl.addWidget(self._info_container)
+        dl.addSpacing(16)
         dl.addWidget(self._file_changed_panel)
 
         layout.addWidget(self._detail_widget)
@@ -200,6 +214,10 @@ class MilestoneDetailPanel(ScrollArea):
     def _update_view_btn_icons(self) -> None:
         """更新视图切换按钮的图标颜色，根据当前主题和选中状态动态切换。"""
         dark = isDarkTheme()
+        
+        # 更新引用竖线颜色
+        line_color = "rgba(255, 255, 255, 0.2)" if dark else "rgba(0, 0, 0, 0.15)"
+        self._quote_line.setStyleSheet(f"background-color: {line_color}; border-radius: 2px;")
         
         # 对于 TransparentToggleToolButton：
         # 1. 浅色主题下：
