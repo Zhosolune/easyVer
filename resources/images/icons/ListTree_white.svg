@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-tree-icon lucide-list-tree"><path d="M8 5h13"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="M3 10a2 2 0 0 0 2 2h3"/><path d="M3 5v12a2 2 0 0 0 2 2h3"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="lucide lucide-list-tree-icon lucide-list-tree" width="16" height="16" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" version="1.1" viewBox="0 0 2048 2048" xmlns="http://www.w3.org/2000/svg">
+ <g fill="#fff" stroke="none">
+  <path d="m603.9 210.05a78.769 78.769 0 0 0-78.768 78.768 78.769 78.769 0 0 0 78.768 78.77h1365.3a78.769 78.769 0 0 0 78.77-78.77 78.769 78.769 0 0 0-78.77-78.768z" stop-color="#000000"/>
+  <path d="m1129 945.23a78.769 78.769 0 0 0-78.77 78.77 78.769 78.769 0 0 0 78.77 78.77h840.21a78.769 78.769 0 0 0 78.77-78.77 78.769 78.769 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m1129 1680.4a78.769 78.769 0 0 0-78.77 78.77 78.769 78.769 0 0 0 78.77 78.77h840.21a78.769 78.769 0 0 0 78.77-78.77 78.769 78.769 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m78.77 735.18a78.769 78.769 0 0 0-78.77 78.77c-1.5099e-5 158.58 130.24 288.82 288.82 288.82h315.08a78.769 78.769 0 0 0 78.77-78.77 78.769 78.769 0 0 0-78.77-78.77h-315.08c-73.438 0-131.28-57.843-131.28-131.28a78.769 78.769 0 0 0-78.768-78.77z" stop-color="#000000"/>
+  <path d="m78.77 210.05a78.769 78.769 0 0 0-78.77 78.768v1260.3c-1.5099e-5 158.58 130.24 288.82 288.82 288.82h315.08a78.769 78.769 0 0 0 78.77-78.77 78.769 78.769 0 0 0-78.77-78.77h-315.08c-73.438-1e-4 -131.28-57.843-131.28-131.28v-1260.3a78.769 78.769 0 0 0-78.768-78.768z" stop-color="#000000"/>
+ </g>
+</svg>

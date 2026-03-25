@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-icon lucide-list"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="lucide lucide-list-icon lucide-list" width="16" height="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" version="1.1" viewBox="0 0 2048 2048" xmlns="http://www.w3.org/2000/svg">
+ <g fill="#000" stroke="none">
+  <path d="m78.77 210.05a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1.0508a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m78.77 945.23a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1.0508a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m78.77 1680.4a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1.0508a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m603.9 210.05a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1365.3a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m603.9 945.23a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1365.3a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+  <path d="m603.9 1680.4a78.77 78.77 0 0 0-78.77 78.77 78.77 78.77 0 0 0 78.77 78.77h1365.3a78.77 78.77 0 0 0 78.77-78.77 78.77 78.77 0 0 0-78.77-78.77z" stop-color="#000000"/>
+ </g>
+</svg>
