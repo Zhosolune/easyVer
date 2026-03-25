@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/easyVer">
         <file>images/logo.png</file>
+        <file>images/icons/list.svg</file>
+        <file>images/icons/list-tree.svg</file>
 
         <file>qss/dark/repo_page.qss</file>
         <file>qss/dark/welcome_page.qss</file>

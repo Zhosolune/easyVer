@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="16" height="16">
+  <defs>
+    <path id="line-segment" d="M 341.33 183.34 a 30 30 0 0 0 -30 30 a 30 30 0 0 0 30 30 h 554.67 a 30 30 0 0 0 30 -30 a 30 30 0 0 0 -30 -30 z" fill="#000000"/>
+    <path id="dot" d="M 128 183.34 a 30 30 0 1 0 0 60 a 30 30 0 1 0 0 -60 z" fill="#000000"/>
+  </defs>
+  <g id="grid">
+    <use xlink:href="#dot" y="0"/> <use xlink:href="#dot" y="298.67"/> <use xlink:href="#dot" y="597.33"/> <use xlink:href="#line-segment" y="0"/> <use xlink:href="#line-segment" y="298.67"/> <use xlink:href="#line-segment" y="597.33"/> </g>
+</svg>

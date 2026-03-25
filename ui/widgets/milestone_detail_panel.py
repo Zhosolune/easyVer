@@ -7,8 +7,8 @@ v2/ui/widgets/milestone_detail_panel.py
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QColor, QIcon
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem, QStackedWidget, QTreeWidgetItem
 )
@@ -119,30 +119,40 @@ class MilestoneDetailPanel(ScrollArea):
         file_layout.setSpacing(8)
 
         self._file_change_header = QWidget(self._file_changed_panel)
-        self._file_change_header.setFixedHeight(50)
+        self._file_change_header.setFixedHeight(28)
         file_header_layout = QHBoxLayout(self._file_change_header)
         file_header_layout.setContentsMargins(10, 0, 10, 0)
 
-        file_title = StrongBodyLabel("文件变更情况", self._file_change_header)
+        file_title = BodyLabel("文件变更", self._file_change_header)
+        font_file = file_title.font()
+        font_file.setPixelSize(16)
+        file_title.setFont(font_file)
         
-        self._list_view_btn = TransparentToolButton(FluentIcon.MENU, self._file_change_header)
+        self._list_view_btn = TransparentToolButton(QIcon(":/easyVer/images/icons/list.svg"), self._file_change_header)
+        self._list_view_btn.setFixedSize(24, 24)
+        self._list_view_btn.setIconSize(QSize(16, 16))
         self._list_view_btn.setToolTip("列表视图")
         self._list_view_btn.setCheckable(True)
         self._list_view_btn.setChecked(True)
-        self._list_view_btn.clicked.connect(lambda: self._on_view_mode_changed("list"))
         
-        self._tree_view_btn = TransparentToolButton(FluentIcon.FOLDER, self._file_change_header)
+        self._tree_view_btn = TransparentToolButton(QIcon(":/easyVer/images/icons/list-tree.svg"), self._file_change_header)
+        self._tree_view_btn.setFixedSize(24, 24)
+        self._tree_view_btn.setIconSize(QSize(16, 16))
         self._tree_view_btn.setToolTip("树状视图")
         self._tree_view_btn.setCheckable(True)
+        self._tree_view_btn.setChecked(False)
+
+        # 互斥逻辑
+        self._list_view_btn.clicked.connect(lambda: self._on_view_mode_changed("list"))
         self._tree_view_btn.clicked.connect(lambda: self._on_view_mode_changed("tree"))
         
         self._stats_label = BodyLabel("", self._file_change_header)
         self._stats_label.setTextFormat(Qt.TextFormat.RichText)
         
         file_header_layout.addWidget(file_title)
+        file_header_layout.addStretch()
         file_header_layout.addWidget(self._list_view_btn)
         file_header_layout.addWidget(self._tree_view_btn)
-        file_header_layout.addStretch()
         file_header_layout.addSpacing(16)
         file_header_layout.addWidget(self._stats_label)
         file_layout.addWidget(self._file_change_header)
@@ -183,10 +193,18 @@ class MilestoneDetailPanel(ScrollArea):
     def _on_view_mode_changed(self, routeKey: str) -> None:
         idx = 0 if routeKey == "list" else 1
         self._file_stack.setCurrentIndex(idx)
-        # 更新按钮选中状态
+        # 更新按钮选中状态，保持互斥
         is_list = (routeKey == "list")
+        
+        # 强制阻止按钮被再次点击取消选中
+        self._list_view_btn.blockSignals(True)
+        self._tree_view_btn.blockSignals(True)
+        
         self._list_view_btn.setChecked(is_list)
         self._tree_view_btn.setChecked(not is_list)
+        
+        self._list_view_btn.blockSignals(False)
+        self._tree_view_btn.blockSignals(False)
         
     def _update_tree_height(self, item=None):
         pass # Optional dynamic height adjustment
@@ -270,8 +288,8 @@ class MilestoneDetailPanel(ScrollArea):
                 
                 build_tree_ui(item, child_node)
                 
-                if child_node.all_files_count <= 10:
-                    item.setExpanded(True)
+                # if child_node.all_files_count <= 10:
+                item.setExpanded(True)
             
             # 再处理文件
             for f in sorted(node.files, key=lambda x: x.file_name):

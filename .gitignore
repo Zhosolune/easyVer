@@ -137,8 +137,3 @@ cython_debug/
 # Windows
 Thumbs.db
 desktop.ini
-
-# PyQt / PySide specific generated files
-*_rc.py
-*_ui.py
-resources/resource_rc.py

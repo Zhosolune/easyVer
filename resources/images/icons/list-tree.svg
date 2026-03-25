@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1024 1024" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#000000" stroke-width="60" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="341.33" y1="213.33" x2="896" y2="213.33" />
+    
+    <line x1="554.67" y1="512" x2="896" y2="512" />
+    
+    <line x1="554.67" y1="810.67" x2="896" y2="810.67" />
+    
+    <path d="M 128 213.33 L 128 725.33 A 85.33 85.33 0 0 0 213.33 810.67 L 341.33 810.67" />
+    
+    <path d="M 128 426.67 A 85.33 85.33 0 0 0 213.33 512 L 341.33 512" />
+  </g>
+</svg>
