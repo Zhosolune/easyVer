@@ -158,6 +158,8 @@ class RepoPage(QWidget):
     # ------------------------------------------------------------------
     def _connect_signals(self) -> None:
         self._milestone_list.milestone_selected.connect(self._milestone_detail.load_milestone)
+        self._milestone_detail.navigate_to_milestone.connect(self._milestone_list.select_milestone)
+        self._milestone_detail.milestone_deleted.connect(self._working_tree.refresh)
         self._milestone_list.milestone_selected.connect(
             lambda sid: self._status_label.setText(f"已选中里程碑 #{sid}")
         )

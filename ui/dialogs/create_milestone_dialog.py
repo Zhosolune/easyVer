@@ -168,6 +168,8 @@ class CreateMilestoneDialog(FluentWidget):
 
         # 全局左右 Splitter
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
+        # 隐藏自带的分隔线
+        splitter.setHandleWidth(0)
 
         # ── 左侧：文件状态区 (上下两栏) ────────────────────────────────
         left = QWidget(self)
@@ -201,6 +203,7 @@ class CreateMilestoneDialog(FluentWidget):
 
         # 左侧上下 Splitter
         left_splitter = QSplitter(Qt.Orientation.Vertical, left)
+        left_splitter.setHandleWidth(0)
 
         # 1. 暂存的更改区域 (staged)
         staged_widget = QWidget(left_splitter)
@@ -758,6 +761,13 @@ class CreateMilestoneDialog(FluentWidget):
                 
         except Exception as e:
             logger.error(f"Failed to create tag attachments: {e}")
+            
+        # 注意：此处需要确保关闭了连接，因为后台线程的 conn 是独立的，
+        # 但我们这里是在主线程（_on_commit_finished 槽函数中）操作数据库。
+        # 考虑到这里是从 self._app 获取的 persistent connection（不应该被关闭），
+        # 我们只做 commit 操作。
+        if 'conn' in locals():
+            conn.commit()
             
         self.accept()
 

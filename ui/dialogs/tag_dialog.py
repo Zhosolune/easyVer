@@ -106,11 +106,10 @@ class TagDialog(MessageBoxBase):
                 self.errorLabel.show()
                 return False
                 
-            # 使用 list_by_repo(1) 检查标签名是否冲突
-            existing_tags = tag_dao.list_by_repo(1)
-            for t in existing_tags:
+            # 检查当前快照中是否已经有同名标签
+            for t in snapshot_tags:
                 if t.name == tag_name:
-                    self.errorLabel.setText("该标签名已存在，请换一个名称")
+                    self.errorLabel.setText("当前里程碑已存在该标签，请换一个名称")
                     self.errorLabel.show()
                     return False
 

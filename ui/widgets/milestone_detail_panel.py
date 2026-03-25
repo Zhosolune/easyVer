@@ -7,7 +7,7 @@ v2/ui/widgets/milestone_detail_panel.py
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, pyqtSignal
 from PyQt6.QtGui import QColor, QIcon
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem, QStackedWidget, QTreeWidgetItem
@@ -30,6 +30,9 @@ if TYPE_CHECKING:
 
 class MilestoneDetailPanel(ScrollArea):
     """右栏：选中里程碑后显示详情和操作工具栏。"""
+    
+    navigate_to_milestone = pyqtSignal(int) # 发出跳转到其他里程碑（如父版本）的信号
+    milestone_deleted = pyqtSignal() # 发出里程碑被删除的信号
 
     def __init__(
         self, app: EasyVerApp, root_path: str, parent: QWidget = None
@@ -84,18 +87,18 @@ class MilestoneDetailPanel(ScrollArea):
         # 2. 里程碑基本信息
         self._info_container = QWidget(self._detail_widget)
         info_container_layout = QHBoxLayout(self._info_container)
-        info_container_layout.setContentsMargins(10, 0, 10, 0)
-        info_container_layout.setSpacing(12)
+        info_container_layout.setContentsMargins(0, 0, 0, 0)
+        info_container_layout.setSpacing(0)
         
         # 左侧竖线（引用效果）
         self._quote_line = QWidget(self._info_container)
-        self._quote_line.setFixedWidth(4)
+        self._quote_line.setFixedWidth(2)
         # 初始颜色将通过 themeChanged 信号统一设置
         
         self._info_panel = QWidget(self._info_container)
         info_layout = QVBoxLayout(self._info_panel)
-        info_layout.setContentsMargins(0, 0, 0, 0)
-        info_layout.setSpacing(8)
+        info_layout.setContentsMargins(10, 0, 10, 0)
+        info_layout.setSpacing(10)
         
         info_container_layout.addWidget(self._quote_line)
         info_container_layout.addWidget(self._info_panel, stretch=1)
@@ -105,14 +108,18 @@ class MilestoneDetailPanel(ScrollArea):
         font.setPixelSize(20)
         self._title.setFont(font)
         
-        self._hash_label = CaptionLabel("", self._info_panel)
-        self._parent_label = CaptionLabel("", self._info_panel)
-        self._author_label = CaptionLabel("", self._info_panel)
-        self._time_label = CaptionLabel("", self._info_panel)
+        self._hash_label = BodyLabel("", self._info_panel)
+        self._parent_label = BodyLabel("", self._info_panel)
+        # 为父版本标签启用链接点击支持
+        self._parent_label.setOpenExternalLinks(False)
+        self._parent_label.linkActivated.connect(self._on_parent_link_activated)
         
-        self._summary_label = CaptionLabel("", self._info_panel)
+        self._author_label = BodyLabel("", self._info_panel)
+        self._time_label = BodyLabel("", self._info_panel)
+        
+        self._summary_label = BodyLabel("", self._info_panel)
         self._summary_label.setWordWrap(True)
-        self._detail_label = CaptionLabel("", self._info_panel)
+        self._detail_label = BodyLabel("", self._info_panel)
         self._detail_label.setWordWrap(True)
 
         info_layout.addWidget(self._title)
@@ -393,8 +400,14 @@ class MilestoneDetailPanel(ScrollArea):
         self._title.setText(snap.name or f"v{version}")
         self._hash_label.setText(f"哈希：#{snap.hash_id}")
         
-        parent_text = f"#{snap.parent_id}" if snap.parent_id else "无 (初始版本)"
-        self._parent_label.setText(f"父版本：{parent_text}")
+        if snap.parent_id:
+            parent_snap = snap_dao.get_by_id(snap.parent_id)
+            parent_hash = parent_snap.hash_id if parent_snap else "未知"
+            # 使用超链接样式，并在 href 中嵌入 parent_id
+            link_color = "#3fb950" if isDarkTheme() else "#0969da"
+            self._parent_label.setText(f'父版本：<a href="{snap.parent_id}" style="color: {link_color}; text-decoration: none;">#{parent_hash}</a>')
+        else:
+            self._parent_label.setText("父版本：无 (初始版本)")
         
         self._author_label.setText(f"作者：{snap.author}")
         self._time_label.setText(f"时间：{ts_to_absolute(snap.created_at)}")
@@ -425,6 +438,14 @@ class MilestoneDetailPanel(ScrollArea):
         self._current_snap_id = None
         self._detail_widget.hide()
         self._empty_label.show()
+
+    def _on_parent_link_activated(self, href: str) -> None:
+        """点击父版本链接时触发跳转"""
+        try:
+            parent_id = int(href)
+            self.navigate_to_milestone.emit(parent_id)
+        except ValueError:
+            pass
 
     # ------------------------------------------------------------------
     # 操作
@@ -477,6 +498,9 @@ class MilestoneDetailPanel(ScrollArea):
                     parent = parent.parent()
                 if parent:
                     parent._milestone_list.refresh()
+                
+                # 发射删除信号以刷新工作区状态
+                self.milestone_deleted.emit()
             except Exception as e:
                 logger.exception("Failed to delete milestone #%d", self._current_snap_id)
                 InfoBar.error("删除失败", str(e), duration=3000, parent=self.window())

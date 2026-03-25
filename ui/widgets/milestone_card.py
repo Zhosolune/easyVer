@@ -82,3 +82,8 @@ class MilestoneCard(CardWidget):
         super().mousePressEvent(event)
         self.clicked_signal.emit(self._snap_id)
 
+    def setSelected(self, is_selected: bool) -> None:
+        """设置选中状态并刷新样式"""
+        self.setProperty("selected", "true" if is_selected else "false")
+        self.style().polish(self)
+

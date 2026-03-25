@@ -39,10 +39,10 @@ class TagFilterDialog(MessageBoxBase):
         
         self.widget.setMinimumWidth(360)
         
-    def set_selected_tags(self, tag_ids: set[int]):
-        """根据传入的已选 ID 集合，高亮对应的 TagBadge"""
+    def set_selected_tags(self, tag_names: set[str]):
+        """根据传入的已选 name 集合，高亮对应的 TagBadge"""
         for badge in self.badges:
-            if badge.tag_id in tag_ids:
+            if badge.text in tag_names:
                 badge.setSelected(True)
         
     def get_selected_tags(self) -> list[tuple[int, str, str]]:

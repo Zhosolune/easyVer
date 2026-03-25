@@ -24,7 +24,7 @@ class MilestoneToolBar(QWidget):
         self.v_layout.setContentsMargins(4, 0, 4, 0)
         self.v_layout.setSpacing(4)
         
-        self.selected_tags: set[int] = set()
+        self.selected_tags: set[str] = set() # 存储 tag 的 name
 
         # 1. CommandBar
         self.commandBar = CommandBar(self)
@@ -68,12 +68,14 @@ class MilestoneToolBar(QWidget):
         self.startDatePicker = FastCalendarPicker(self.dateRangeWidget)
         self.startDatePicker.setCursor(Qt.CursorShape.PointingHandCursor)
         self.startDatePicker.setText("起始时间")
+        self.startDatePicker.setFixedWidth(125)
         self._date_sep = QLabel("~", self.dateRangeWidget)
         self._date_sep.setObjectName("dateRangeSep")
         self._date_sep.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.endDatePicker = FastCalendarPicker(self.dateRangeWidget)
         self.endDatePicker.setCursor(Qt.CursorShape.PointingHandCursor)
         self.endDatePicker.setText("截止时间")
+        self.endDatePicker.setFixedWidth(125)
 
         date_range_layout.addWidget(self.startDatePicker)
         date_range_layout.addWidget(self._date_sep)
@@ -132,21 +134,21 @@ class MilestoneToolBar(QWidget):
         self.tagFilterWidget.show()
         
     def add_tag_chip(self, tag_id: int, tag_name: str, color_hex: str = "#5B9BD5"):
-        if tag_id in self.selected_tags:
+        if tag_name in self.selected_tags:
             return
             
-        self.selected_tags.add(tag_id)
+        self.selected_tags.add(tag_name)
         
         # 复用 TagBadge 作为 Chip，使用默认遮罩模式
         badge = TagBadge(tag_id, tag_name, color_hex, self.tagFilterWidget, is_filter_mode=False)
         badge.deleteClicked.connect(lambda: self.remove_tag_chip(badge))
         
         self.tagFilterLayout.addWidget(badge)
-        
+
     def remove_tag_chip(self, badge: TagBadge):
-        tag_id = badge.tag_id
-        if tag_id in self.selected_tags:
-            self.selected_tags.remove(tag_id)
+        tag_name = badge.text
+        if tag_name in self.selected_tags:
+            self.selected_tags.remove(tag_name)
             badge.hide()
             
         self.tagFilterLayout.removeWidget(badge)

@@ -80,7 +80,8 @@ class MilestoneListPanel(QWidget):
         # 搜索无结果提示
         self._no_match_label = BodyLabel("未找到匹配项", self)
         self._no_match_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self._no_match_label, stretch=1)
+        layout.addWidget(self._no_match_label)
+        layout.addStretch(1)
         self._no_match_label.hide()
 
     # ------------------------------------------------------------------
@@ -185,8 +186,16 @@ class MilestoneListPanel(QWidget):
             return
         from db.repositories.tag_dao import TagDAO
         tags = TagDAO(conn).list_by_repo(1)
+        
+        # 去重：不同里程碑可能有同名标签，筛选面板只需要展示一次
+        unique_tags = []
+        seen_names = set()
+        for t in tags:
+            if t.name not in seen_names:
+                seen_names.add(t.name)
+                unique_tags.append(t)
 
-        dlg = TagFilterDialog(tags, self.window())
+        dlg = TagFilterDialog(unique_tags, self.window())
         dlg.set_selected_tags(self._toolbar.selected_tags)
         
         if dlg.exec():
@@ -216,12 +225,17 @@ class MilestoneListPanel(QWidget):
         if date_mode:
             start_date: QDate = self._toolbar.startDatePicker.date
             end_date: QDate = self._toolbar.endDatePicker.date
+            
+            # 使用 QTime 构建完整的 QDateTime
+            from PyQt6.QtCore import QTime, Qt
+            
             if start_date and start_date.isValid():
-                start_ts = QDateTime(start_date).toSecsSinceEpoch()
+                dt_start = QDateTime(start_date, QTime(0, 0, 0), Qt.TimeSpec.LocalTime)
+                start_ts = dt_start.toSecsSinceEpoch()
+                
             if end_date and end_date.isValid():
-                # 结束日期包含当天 23:59:59
-                from PyQt6.QtCore import QTime
-                end_ts = QDateTime(end_date, QTime(23, 59, 59)).toSecsSinceEpoch()
+                dt_end = QDateTime(end_date, QTime(23, 59, 59), Qt.TimeSpec.LocalTime)
+                end_ts = dt_end.toSecsSinceEpoch()
 
         target_tags = self._toolbar.selected_tags if tag_mode else None
 
@@ -238,8 +252,8 @@ class MilestoneListPanel(QWidget):
 
             # 标签过滤（AND 逻辑：必须包含所有选中标签）
             if tag_mode and target_tags:
-                card_tag_ids = {t.id for t in card._tags}
-                if not target_tags.issubset(card_tag_ids):
+                card_tag_names = {t.name for t in card._tags}
+                if not target_tags.issubset(card_tag_names):
                     visible = False
 
             card.setVisible(visible)
@@ -266,3 +280,25 @@ class MilestoneListPanel(QWidget):
             logger.info("Tag #%d deleted successfully", tag_id)
         except Exception:
             logger.exception("Failed to delete tag #%d", tag_id)
+
+    def select_milestone(self, snap_id: int) -> None:
+        """通过程序选中指定的里程碑卡片，并确保其在视图中可见。"""
+        target_card = None
+        for card in self._cards:
+            if card._snap_id == snap_id:
+                target_card = card
+                break
+                
+        if target_card:
+            # 确保目标卡片可见（处理可能被过滤掉的情况）
+            if not target_card.isVisible():
+                self._toolbar.reset_filters()
+                self._apply_filter()
+                
+            # 滚动到该卡片位置
+            # 使用 QTimer.singleShot 确保布局更新后再滚动
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(0, lambda: self._scroll.ensureWidgetVisible(target_card))
+            
+            # 发出选中信号以更新右侧详情
+            self.milestone_selected.emit(snap_id)
