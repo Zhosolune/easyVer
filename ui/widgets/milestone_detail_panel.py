@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 from qfluentwidgets import (
     ScrollArea, BodyLabel, StrongBodyLabel, CaptionLabel, FluentIcon,
     InfoBar, CommandBar, Action, ListWidget, ToolTipFilter, ToolTipPosition,
-    TreeWidget, isDarkTheme, TransparentToolButton
+    TreeWidget, isDarkTheme, TransparentToggleToolButton, qconfig
 )
 
 import logging
@@ -122,29 +122,36 @@ class MilestoneDetailPanel(ScrollArea):
         self._file_change_header.setFixedHeight(28)
         file_header_layout = QHBoxLayout(self._file_change_header)
         file_header_layout.setContentsMargins(10, 0, 10, 0)
+        file_header_layout.setSpacing(0)
 
         file_title = BodyLabel("文件变更", self._file_change_header)
         font_file = file_title.font()
         font_file.setPixelSize(16)
         file_title.setFont(font_file)
         
-        self._list_view_btn = TransparentToolButton(QIcon(":/easyVer/images/icons/list.svg"), self._file_change_header)
+        self._list_view_btn = TransparentToggleToolButton(QIcon(":/easyVer/images/icons/List_black.svg"), self._file_change_header)
         self._list_view_btn.setFixedSize(24, 24)
         self._list_view_btn.setIconSize(QSize(16, 16))
         self._list_view_btn.setToolTip("列表视图")
-        self._list_view_btn.setCheckable(True)
+        self._list_view_btn.installEventFilter(ToolTipFilter(self._list_view_btn, showDelay=300, position=ToolTipPosition.TOP))
         self._list_view_btn.setChecked(True)
         
-        self._tree_view_btn = TransparentToolButton(QIcon(":/easyVer/images/icons/list-tree.svg"), self._file_change_header)
+        self._tree_view_btn = TransparentToggleToolButton(QIcon(":/easyVer/images/icons/ListTree_black.svg"), self._file_change_header)
         self._tree_view_btn.setFixedSize(24, 24)
         self._tree_view_btn.setIconSize(QSize(16, 16))
         self._tree_view_btn.setToolTip("树状视图")
-        self._tree_view_btn.setCheckable(True)
+        self._tree_view_btn.installEventFilter(ToolTipFilter(self._tree_view_btn, showDelay=300, position=ToolTipPosition.TOP))
         self._tree_view_btn.setChecked(False)
 
         # 互斥逻辑
         self._list_view_btn.clicked.connect(lambda: self._on_view_mode_changed("list"))
         self._tree_view_btn.clicked.connect(lambda: self._on_view_mode_changed("tree"))
+        
+        # 初始化图标颜色状态
+        self._update_view_btn_icons()
+        
+        # 监听主题变化，动态更新图标
+        qconfig.themeChanged.connect(self._update_view_btn_icons)
         
         self._stats_label = BodyLabel("", self._file_change_header)
         self._stats_label.setTextFormat(Qt.TextFormat.RichText)
@@ -190,6 +197,28 @@ class MilestoneDetailPanel(ScrollArea):
         
         self._load_worker: Optional[FileLoadWorker] = None
 
+    def _update_view_btn_icons(self) -> None:
+        """更新视图切换按钮的图标颜色，根据当前主题和选中状态动态切换。"""
+        dark = isDarkTheme()
+        
+        # 对于 TransparentToggleToolButton：
+        # 1. 浅色主题下：
+        #    - 未选中：背景透明，应使用黑色图标（看起来是黑灰色）
+        #    - 选中：背景变黑，应使用白色图标，以产生反差
+        # 2. 深色主题下：
+        #    - 未选中：背景透明，应使用白色图标（看起来是灰白色）
+        #    - 选中：背景变白，应使用黑色图标，以产生反差
+        
+        if dark:
+            list_icon = "List_black.svg" if self._list_view_btn.isChecked() else "List_white.svg"
+            tree_icon = "ListTree_black.svg" if self._tree_view_btn.isChecked() else "ListTree_white.svg"
+        else:
+            list_icon = "List_white.svg" if self._list_view_btn.isChecked() else "List_black.svg"
+            tree_icon = "ListTree_white.svg" if self._tree_view_btn.isChecked() else "ListTree_black.svg"
+            
+        self._list_view_btn.setIcon(QIcon(f":/easyVer/images/icons/{list_icon}"))
+        self._tree_view_btn.setIcon(QIcon(f":/easyVer/images/icons/{tree_icon}"))
+
     def _on_view_mode_changed(self, routeKey: str) -> None:
         idx = 0 if routeKey == "list" else 1
         self._file_stack.setCurrentIndex(idx)
@@ -205,6 +234,9 @@ class MilestoneDetailPanel(ScrollArea):
         
         self._list_view_btn.blockSignals(False)
         self._tree_view_btn.blockSignals(False)
+        
+        # 切换完成后更新图标颜色
+        self._update_view_btn_icons()
         
     def _update_tree_height(self, item=None):
         pass # Optional dynamic height adjustment
