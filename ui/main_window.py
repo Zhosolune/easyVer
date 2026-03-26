@@ -113,22 +113,61 @@ class MainWindow(MSFluentWindow):
     def _add_repo_nav(self, root_path: str, name: str) -> None:
         """创建 RepoPage 并注册到导航栏。"""
         page = RepoPage(self._app, root_path, self)
-        page.setObjectName(f"repo_{root_path.replace(':', '').replace('/', '_').replace(chr(92), '_')}")
+        route_key = f"repo_{root_path.replace(':', '').replace('/', '_').replace(chr(92), '_')}"
+        page.setObjectName(route_key)
         self._repo_pages[root_path] = page
         self.addSubInterface(
             page, FluentIcon.FOLDER, name,
             position=NavigationItemPosition.TOP,
         )
+        
+        # 获取导航项并绑定右键菜单
+        item_widget = self.navigationInterface.widget(route_key)
+        if item_widget:
+            item_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            item_widget.customContextMenuRequested.connect(
+                lambda pos, rp=root_path, w=item_widget: self._show_repo_context_menu(rp, w.mapToGlobal(pos))
+            )
+
+    def _show_repo_context_menu(self, root_path: str, pos) -> None:
+        from qfluentwidgets import RoundMenu, Action, MessageBox, FluentIcon
+        
+        menu = RoundMenu(parent=self)
+        
+        # 删除仓库菜单项
+        delete_action = Action(FluentIcon.DELETE, "删除仓库", self)
+        
+        def on_delete():
+            title = "删除仓库"
+            content = "确定要从应用中移除该仓库吗？\n\n这将会清除此仓库的配置和历史记录，但不会删除您工作目录中的实际文件。"
+            w = MessageBox(title, content, self)
+            if w.exec():
+                # 先切换到欢迎页
+                self.switchTo(self._welcome_page)
+                # 从 UI 移除
+                if root_path in self._repo_pages:
+                    page = self._repo_pages.pop(root_path)
+                    self.removeInterface(page)
+                    page.deleteLater()
+                # 从应用彻底删除
+                self._app.delete_repo(root_path)
+                
+                # 刷新欢迎页最近记录
+                self._welcome_page.refresh_recent()
+                self.show_success("已删除仓库", f"仓库 {root_path} 已移除")
+                
+        delete_action.triggered.connect(on_delete)
+        menu.addAction(delete_action)
+        menu.exec(pos)
 
     def remove_repo_page(self, root_path: str) -> None:
         """从导航栏移除仓库（关闭仓库时调用）。"""
-        # MSFluentWindow 暂不支持运行时删除 SubInterface，
-        # 当前方案：切换到欢迎页并隐藏该页
+        self.switchTo(self._welcome_page)
         if root_path in self._repo_pages:
             page = self._repo_pages.pop(root_path)
-            page.setVisible(False)
+            self.removeInterface(page)
+            page.deleteLater()
         self._app.close_repo(root_path)
-        self.switchTo(self._welcome_page)
 
     # ------------------------------------------------------------------
     # 通知工具

@@ -86,18 +86,13 @@ class WelcomePage(ScrollArea):
         cl.addWidget(btn_open)
 
         # ── 最近仓库 ─────────────────────────────────────
-        recents = cfg.recentRepos.value
-        if recents:
-            cl.addSpacing(12)
-            cl.addWidget(CaptionLabel("最近打开：", card))
-            for path in recents[:6]:
-                p = Path(path)
-                btn = PushButton(FluentIcon.HISTORY, f"  {p.name}", card)
-                btn.setCursor(Qt.CursorShape.PointingHandCursor)
-                btn.setToolTip(str(p))
-                btn.setFixedHeight(36)
-                btn.clicked.connect(lambda _, rp=path: self._open(rp))
-                cl.addWidget(btn)
+        self._recent_container = QWidget(card)
+        self._recent_layout = QVBoxLayout(self._recent_container)
+        self._recent_layout.setContentsMargins(0, 0, 0, 0)
+        self._recent_layout.setSpacing(12)
+        cl.addWidget(self._recent_container)
+        
+        self.refresh_recent()
 
         outer.addStretch(1)
         outer.addWidget(card, alignment=Qt.AlignmentFlag.AlignHCenter)
@@ -106,6 +101,27 @@ class WelcomePage(ScrollArea):
         self.setWidget(container)
         self.setWidgetResizable(True)
         self.enableTransparentBackground()
+
+    def refresh_recent(self) -> None:
+        """刷新最近仓库列表"""
+        # 清空旧内容
+        while self._recent_layout.count():
+            item = self._recent_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+                
+        recents = cfg.recentRepos.value
+        if recents:
+            self._recent_layout.addSpacing(12)
+            self._recent_layout.addWidget(CaptionLabel("最近打开：", self._recent_container))
+            for path in recents[:6]:
+                p = Path(path)
+                btn = PushButton(FluentIcon.HISTORY, f"  {p.name}", self._recent_container)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                btn.setToolTip(str(p))
+                btn.setFixedHeight(36)
+                btn.clicked.connect(lambda _, rp=path: self._open(rp))
+                self._recent_layout.addWidget(btn)
 
     # ------------------------------------------------------------------
     def _on_new_repo(self) -> None:

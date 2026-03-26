@@ -138,3 +138,11 @@ def push_recent(path: str) -> None:
         recents.remove(path)
     recents.insert(0, path)
     qconfig.set(cfg.recentRepos, recents[:8])
+
+
+def remove_recent(path: str) -> None:
+    """从最近访问列表中移除指定仓库。"""
+    recents: list[str] = list(cfg.recentRepos.value)
+    if path in recents:
+        recents.remove(path)
+        qconfig.set(cfg.recentRepos, recents)

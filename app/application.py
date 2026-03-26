@@ -14,7 +14,7 @@ from db.connection import DatabaseConnection
 from db.migrator import run_migrations
 from core.repository import RepositoryService
 from db.repositories.repo_dao import RepoRecord
-from app.app_config import add_repo, remove_repo, push_recent, saved_repos
+from app.app_config import add_repo, remove_repo, push_recent, saved_repos, remove_recent
 
 
 class EasyVerApp:
@@ -67,6 +67,15 @@ class EasyVerApp:
             _, conn = self._open_repos.pop(key)
             conn.close()
         remove_repo(key)
+
+    def delete_repo(self, root_path: str) -> None:
+        """从应用中彻底删除仓库记录。"""
+        key = str(Path(root_path).resolve())
+        record = self.get_record(root_path)
+        if record:
+            self.repo_service.delete(record.id)
+        self.close_repo(root_path)
+        remove_recent(key)
 
     def restore_last_session(self) -> list[str]:
         """

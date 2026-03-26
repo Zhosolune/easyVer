@@ -36,3 +36,4 @@
 | 2026-03-25 15:00 | 修复 | db/migrations/003_update_tags_unique.sql, ui/dialogs/tag_dialog.py, ui/widgets/milestone_list_panel.py, ui/widgets/milestone_tool_bar.py | 修复保存标签时唯一性约束报错 | 1. 通过数据库迁移将 `tags` 表的 UNIQUE 约束从 `(repo_id, name)` 放宽为 `(snapshot_id, name)`，允许跨里程碑复用同名标签；2. 修复 TagDialog 中的查重逻辑；3. 修复标签筛选器按 ID 过滤导致复用标签无法正确筛选的问题，改为按 name 过滤 | 已测试 |
 | 2026-03-25 15:10 | 修复 | main.py | 屏蔽无意义的终端报错提示 | 通过 `qInstallMessageHandler` 拦截全局 Qt 日志输出，过滤因 `qfluentwidgets` 组件底层使用 `pixelSize` 导致触发的 `QFont::setPointSize: Point size <= 0 (-1)` 警告刷屏问题 | 待测试 |
 | 2026-03-25 16:48 | 优化 | ui/widgets/milestone_card.py, ui/widgets/milestone_list_panel.py | 强化里程碑卡片选中视觉效果 | 重写 `paintEvent` 绘制主题色左侧高亮竖条，覆盖背景色方法实现半透明主题色背景；新增 `_select_card`/`_on_card_clicked` 方法统一管理选中状态，修复原来 `setSelected` 无实际效果的问题 | 待测试 |
+| 2026-03-26 15:00 | 新增 | app/app_config.py, app/application.py, ui/main_window.py, ui/pages/welcome_page.py | 添加删除仓库功能 | 支持在左侧导航栏通过右键菜单彻底移除仓库记录，并同步刷新欢迎页最近访问列表 | 待测试 |
