@@ -135,13 +135,31 @@ class MilestoneListPanel(QWidget):
                     snap.id, version, snap.name, snap.summary, snap.created_at, file_count,
                     tags_by_snap.get(snap.id, []), snap.hash_id, self._container
                 )
-                card.clicked_signal.connect(self.milestone_selected)
+                card.clicked_signal.connect(self._on_card_clicked)
                 card.delete_tag_signal.connect(self._on_delete_tag)
                 self._cards.append(card)
                 # 插入到 stretch 前面
                 self._card_layout.insertWidget(self._card_layout.count() - 1, card)
         finally:
             self._container.setUpdatesEnabled(True)
+
+    def _on_card_clicked(self, snap_id: int) -> None:
+        """处理卡片点击，更新选中状态并向外发出信号。
+
+        Args:
+            snap_id: 被点击卡片的快照 ID
+        """
+        self._select_card(snap_id)
+        self.milestone_selected.emit(snap_id)
+
+    def _select_card(self, snap_id: int) -> None:
+        """将指定 snap_id 对应的卡片置为选中，其余卡片取消选中。
+
+        Args:
+            snap_id: 要选中的快照 ID；传入 -1 表示取消所有选中
+        """
+        for card in self._cards:
+            card.setSelected(card._snap_id == snap_id)
 
     def _on_search(self, text: str) -> None:
         """根据搜索文本过滤卡片。"""
@@ -282,7 +300,11 @@ class MilestoneListPanel(QWidget):
             logger.exception("Failed to delete tag #%d", tag_id)
 
     def select_milestone(self, snap_id: int) -> None:
-        """通过程序选中指定的里程碑卡片，并确保其在视图中可见。"""
+        """通过程序选中指定的里程碑卡片，并确保其在视图中可见。
+
+        Args:
+            snap_id: 要选中的快照 ID
+        """
         target_card = None
         for card in self._cards:
             if card._snap_id == snap_id:
@@ -294,7 +316,10 @@ class MilestoneListPanel(QWidget):
             if not target_card.isVisible():
                 self._toolbar.reset_filters()
                 self._apply_filter()
-                
+
+            # 更新选中态视觉
+            self._select_card(snap_id)
+
             # 滚动到该卡片位置
             # 使用 QTimer.singleShot 确保布局更新后再滚动
             from PyQt6.QtCore import QTimer

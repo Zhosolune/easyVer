@@ -29,12 +29,6 @@ QFrame#milestoneCard {
     border: none;
 }
 
-QFrame#milestoneCard[selected="true"] {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid --ThemeColorPrimary;
-    border-radius: 6px;
-}
-
 /* ─── ScrollArea 透明化 ───────────────────────────────────── */
 QScrollArea,
 QScrollArea > QWidget > QWidget {
