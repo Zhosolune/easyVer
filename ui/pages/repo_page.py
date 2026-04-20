@@ -50,6 +50,11 @@ class RepoPage(QWidget):
     # ------------------------------------------------------------------
     # 布局
     # ------------------------------------------------------------------
+    def cleanup(self) -> None:
+        """清理资源。"""
+        if hasattr(self, '_working_tree'):
+            self._working_tree.cleanup()
+
     def _setup_ui(self) -> None:
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)

@@ -139,7 +139,7 @@ class MainWindow(MSFluentWindow):
         
         def on_delete():
             title = "删除仓库"
-            content = "确定要从应用中移除该仓库吗？\n\n这将会清除此仓库的配置和历史记录，但不会删除您工作目录中的实际文件。"
+            content = "确定要从应用中移除该仓库吗？\n\n注意：这将会彻底删除该仓库的所有版本记录和 .easyver 配置文件，但不会删除您工作目录中的实际文件。"
             w = MessageBox(title, content, self)
             if w.exec():
                 # 先切换到欢迎页
@@ -148,6 +148,7 @@ class MainWindow(MSFluentWindow):
                 if root_path in self._repo_pages:
                     page = self._repo_pages.pop(root_path)
                     self.removeInterface(page)
+                    page.cleanup()
                     page.deleteLater()
                 # 从应用彻底删除
                 self._app.delete_repo(root_path)
@@ -166,6 +167,7 @@ class MainWindow(MSFluentWindow):
         if root_path in self._repo_pages:
             page = self._repo_pages.pop(root_path)
             self.removeInterface(page)
+            page.cleanup()
             page.deleteLater()
         self._app.close_repo(root_path)
 

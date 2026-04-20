@@ -112,6 +112,21 @@ class WorkingTreePanel(QWidget):
         self._worker.done.connect(self._populate)
         self._worker.start()
 
+    def cleanup(self) -> None:
+        """清理资源（如文件监听器等）。"""
+        if hasattr(self, '_watcher'):
+            dirs = self._watcher.directories()
+            files = self._watcher.files()
+            if dirs:
+                self._watcher.removePaths(dirs)
+            if files:
+                self._watcher.removePaths(files)
+            self._watcher.deleteLater()
+        
+        if self._worker and self._worker.isRunning():
+            self._worker.quit()
+            self._worker.wait()
+            
     # ------------------------------------------------------------------
     def _populate(self, files: list[FileStatus]) -> None:
         self._files_cache = files

@@ -69,13 +69,45 @@ class EasyVerApp:
         remove_repo(key)
 
     def delete_repo(self, root_path: str) -> None:
-        """从应用中彻底删除仓库记录。"""
+        """从应用中彻底删除仓库记录，并清理 .easyver 配置目录。"""
         key = str(Path(root_path).resolve())
         record = self.get_record(root_path)
         if record:
             self.repo_service.delete(record.id)
+        
+        # 先关闭连接
         self.close_repo(root_path)
         remove_recent(key)
+        
+        # 删除 .easyver 目录前确保等待一下，给文件系统释放句柄的时间
+        import time
+        time.sleep(0.1)
+        
+        import shutil
+        easyver_dir = Path(root_path) / ".easyver"
+        if easyver_dir.exists():
+            # 定义一个处理文件占用错误的函数
+            def handle_remove_readonly(func, path, exc_info):
+                import stat
+                import os
+                # 如果是权限问题，尝试修改权限后重试
+                if not os.access(path, os.W_OK):
+                    os.chmod(path, stat.S_IWUSR)
+                    func(path)
+                else:
+                    raise
+                    
+            try:
+                shutil.rmtree(easyver_dir, onerror=handle_remove_readonly)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error("Failed to delete .easyver directory at %s: %s", easyver_dir, e)
+                # 再次尝试一次
+                time.sleep(0.5)
+                try:
+                    shutil.rmtree(easyver_dir, onerror=handle_remove_readonly)
+                except Exception as e2:
+                    logging.getLogger(__name__).error("Retry failed: %s", e2)
 
     def restore_last_session(self) -> list[str]:
         """
