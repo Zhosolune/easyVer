@@ -113,6 +113,9 @@ class CreateMilestoneDialog(FluentWidget):
         self, app: "EasyVerApp", root_path: str, parent: QWidget = None
     ) -> None:
         super().__init__(parent)
+        # FluentWidget 是普通 QWidget 子类，传入 parent 后默认会嵌入父窗口成为子部件。
+        # 显式设置 Qt.Window 标志，使其作为独立顶层窗口弹出（与 MessageBoxBase 行为一致）。
+        self.setWindowFlag(Qt.WindowType.Window, True)
         self._app = app
         self._root_path = root_path
         

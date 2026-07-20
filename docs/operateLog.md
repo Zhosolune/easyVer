@@ -37,3 +37,4 @@
 | 2026-03-25 15:10 | 修复 | main.py | 屏蔽无意义的终端报错提示 | 通过 `qInstallMessageHandler` 拦截全局 Qt 日志输出，过滤因 `qfluentwidgets` 组件底层使用 `pixelSize` 导致触发的 `QFont::setPointSize: Point size <= 0 (-1)` 警告刷屏问题 | 待测试 |
 | 2026-03-25 16:48 | 优化 | ui/widgets/milestone_card.py, ui/widgets/milestone_list_panel.py | 强化里程碑卡片选中视觉效果 | 重写 `paintEvent` 绘制主题色左侧高亮竖条，覆盖背景色方法实现半透明主题色背景；新增 `_select_card`/`_on_card_clicked` 方法统一管理选中状态，修复原来 `setSelected` 无实际效果的问题 | 待测试 |
 | 2026-03-26 15:00 | 新增 | app/app_config.py, app/application.py, ui/main_window.py, ui/pages/welcome_page.py | 添加删除仓库功能 | 支持在左侧导航栏通过右键菜单彻底移除仓库记录，并同步刷新欢迎页最近访问列表 | 待测试 |
+| 2026-07-17 16:11 | 修复 | ui/dialogs/create_milestone_dialog.py | 修复创建里程碑对话框嵌入主窗口而非独立弹出 | `CreateMilestoneDialog` 继承 `FluentWidget`（普通 QWidget 子类），传入 parent 后被当作子部件嵌入主窗口。显式设置 `Qt.WindowType.Window` 标志使其作为独立顶层窗口弹出 | 待测试 |
